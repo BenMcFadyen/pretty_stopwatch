@@ -38,6 +38,7 @@ class Stopwatch
   # Stopwatch methods are not idempotent; it is an error to start or stop a stopwatch that is already in the desired state.
   class IllegalStateError < StandardError
   end
+
   attr_reader :name
   attr_reader :running
 
