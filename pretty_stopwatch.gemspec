@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.authors = ["Ben Mcfadyen"]
   spec.email = ["ben.mcfadyen3@gmail.com"]
 
-  spec.summary = "Pretty Stopwatch"
-  spec.description = "Pretty Stopwatch"
+  spec.summary = "A simple Stopwatch with nanosecond precision and readable formatting."
+  spec.description = "A simple Stopwatch with nanosecond precision and readable formatting."
   spec.homepage = "https://github.com/BenMcFadyen/pretty_stopwatch"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.0.0"
