@@ -35,17 +35,13 @@ require_relative "pretty_stopwatch/version"
 #   puts "slept for #{stopwatch.get(:foo)}"
 #   Output: "slept for 0.1014ms"
 class Stopwatch
-
   # Stopwatch methods are not idempotent; it is an error to start or stop a stopwatch that is already in the desired state.
   class IllegalStateError < StandardError
   end
-
-  @start_nanos
   attr_reader :name
   attr_reader :running
-  attr_reader :elapsed_nanos
 
-  def initialize(name = nil, elapsed_nanos) # optional variable
+  def initialize(name = nil, elapsed_nanos = 0) # optional variable
     @name = name
     @start_nanos = nil
     @running = false
@@ -63,20 +59,19 @@ class Stopwatch
   private_class_method :new # private constructor
 
   class << self
-
     def create_started(name = nil, elapsed_nanos: 0)
-      self.new(name, elapsed_nanos).start
+      new(name, elapsed_nanos).start
     end
 
     def create_unstarted(name = nil, elapsed_nanos: 0)
-      self.new(name, elapsed_nanos)
+      new(name, elapsed_nanos)
     end
 
     def time(callable = nil, &block)
-      stopwatch = self.create_started
+      stopwatch = create_started
       if callable
         callable.call
-      elsif block_given?
+      elsif block
         block.call # yield also valid
       else
         raise "no callable/block given" # todo
@@ -118,24 +113,23 @@ class Stopwatch
   end
 
   def to_s
-    value_with_unit = PrettyUnitFormatter::scale_nanos_with_unit(elapsed_nanos)
+    value_with_unit = PrettyUnitFormatter.scale_nanos_with_unit(elapsed_nanos)
     return "'#{@name}' elapsed: #{value_with_unit}" if @name
-    "#{value_with_unit}"
+    value_with_unit.to_s
   end
 
   class PrettyUnitFormatter
     @units = [
-      { name: 'day', divisor: 1_000_000_000 * 60 * 60 * 24 },
-      { name: 'hour', divisor: 1_000_000_000 * 60 * 60 },
-      { name: 'min', divisor: 1_000_000_000 * 60 },
-      { name: 's',  divisor: 1_000_000_000 },
-      { name: 'ms', divisor: 1_000_000 },
-      { name: 'μs', divisor: 1_000 },
-      { name: 'ns', divisor: 1 }
+      {name: "day", divisor: 1_000_000_000 * 60 * 60 * 24},
+      {name: "hour", divisor: 1_000_000_000 * 60 * 60},
+      {name: "min", divisor: 1_000_000_000 * 60},
+      {name: "s", divisor: 1_000_000_000},
+      {name: "ms", divisor: 1_000_000},
+      {name: "μs", divisor: 1_000},
+      {name: "ns", divisor: 1}
     ]
 
     class << self
-
       def get_unit(nanos)
         found_unit = @units.find { |unit| nanos >= unit[:divisor] }
         raise "No matching unit found for #{nanos}" if found_unit.nil?
@@ -151,10 +145,8 @@ class Stopwatch
 
       # format float to 3dp & remove trailing zeros
       private def format_float(float)
-        sprintf('%f', float.round(3)).sub(/\.?0*$/, '')
+        sprintf("%f", float.round(3)).sub(/\.?0*$/, "")
       end
     end
-
   end
-
 end
