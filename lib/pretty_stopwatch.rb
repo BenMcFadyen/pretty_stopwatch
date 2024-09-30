@@ -1,40 +1,35 @@
 # frozen_string_literal: true
 
-require_relative "pretty_stopwatch/version"
-
+# A simple Stopwatch with nanosecond precision and readable formatting.
+# ``` Basic Usage
+#     stopwatch = Stopwatch::create_started
+#     sleep(0.1)
+#     stopwatch.stop # optional
+#     puts "slept for #{stopwatch}" # to_s optional
+#     # slept for 100.02 ms
+# ```
+#  Named:
+#     stopwatch = Stopwatch::create_started(:foo)
+#     sleep(0.2)
+#     puts "#{stopwatch}"
+#     'foo' elapsed: 200.235 ms
+#  Block:
+#     stopwatch = Stopwatch::time{sleep 0.1}
+#  Lambda:
+#     lambda = -> {sleep 0.15}
+#     stopwatch = Stopwatch::time(lambda)
+#  Proc:
+#     proc = Proc.new {sleep 0.15}
+#     stopwatch = Stopwatch::time(proc)
 #
-# Based on the Guava Stopwatch com.google.common.base.Stopwatch
-# Credit: The Guava Authors
+# Uses: Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond) to measure elapsed time.
 #
-# = Basic Example:
-#   stopwatch = Stopwatch::create_started
-#   sleep(0.1)
-#   stopwatch.stop # optional
-#   puts "slept for #{stopwatch}" # to_s optional
-#   Output: "slept for 0.1014ms"
+# The state-changing methods are not idempotent; it is an error to start or stop a stopwatch
+# that is already in the desired state.
 #
-# = Named Example:
-#   stopwatch = Stopwatch::create_started(:foo)
-#   sleep(0.1)
-#   puts "slept for #{stopwatch.get(:foo)}"
-#   Output: "slept for 0.1014ms"
-#
-# = Block Example:
-#   stopwatch = Stopwatch::time{sleep 0.1}
-#
-# = Lambda Example:
-#   lambda = -> {sleep 0.15}
-#   stopwatch = Stopwatch::time(lambda)
-#
-# = Proc Example:
-#   proc = Proc.new {sleep 0.15}
-#   stopwatch = Stopwatch::time(proc)
-
-#   stopwatch = Stopwatch::create_started(:foo)
-#   sleep(0.1)
-#   puts "slept for #{stopwatch.get(:foo)}"
-#   Output: "slept for 0.1014ms"
+# Implementation based on the Guava Stopwatch class: 'com.google.common.base.Stopwatch' Credit: The Guava Authors
 class Stopwatch
+
   # Stopwatch methods are not idempotent; it is an error to start or stop a stopwatch that is already in the desired state.
   class IllegalStateError < StandardError
   end
@@ -60,14 +55,28 @@ class Stopwatch
   private_class_method :new # private constructor
 
   class << self
+
+
+    # Creates a new Stopwatch, and starts it.
+    #
+    # @param [String] name - (optional) - name of the stopwatch.
+    # * +elapsed_nanos+ - (optional) - elapsed_nanos value for the Stopwatch.
     def create_started(name = nil, elapsed_nanos: 0)
       new(name, elapsed_nanos).start
     end
 
+    # Creates a new Stopwatch, but does not start it.
+    #
+    # * +name+ - (optional) - name of the stopwatch.
+    # * +elapsed_nanos+ - (optional) - elapsed_nanos value for the Stopwatch.
     def create_unstarted(name = nil, elapsed_nanos: 0)
       new(name, elapsed_nanos)
     end
 
+    # Creates a new Stopwatch, executes the given callable/block, returns the stopped Stopwatch.
+    #
+    # * +callable+ - callable to execute
+    # * +block+ - (optional) - elapsed_nanos value for the Stopwatch.
     def time(callable = nil, &block)
       stopwatch = create_started
       if callable
@@ -95,7 +104,7 @@ class Stopwatch
     self
   end
 
-  # reset the elapsed time and stop the stopwatch
+  # reset the elapsed time and stops the Stopwatch.
   def reset
     @running = false
     @elapsed_nanos = 0
