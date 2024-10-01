@@ -1,3 +1,6 @@
+### 0.1.4
+* Documentation (YARD)
+
 ### 0.1.3
 * Documentation / GEM configuration
 
