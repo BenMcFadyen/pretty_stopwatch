@@ -28,7 +28,6 @@
 #     proc = Proc.new {sleep 0.15}
 #     stopwatch = Stopwatch::time(proc)
 class Stopwatch
-
   class IllegalStateError < StandardError
   end
 
@@ -55,7 +54,6 @@ class Stopwatch
   private_class_method :new # private constructor
 
   class << self
-
     # Creates a new Stopwatch, and starts it.
     #
     # @param name [String] (optional) the name of the Stopwatch
