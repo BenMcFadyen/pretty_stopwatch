@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "pretty_stopwatch"
+require "pretty_stopwatch/version"
 
 RSpec.describe PrettyStopwatch do
   it "has a version number" do
@@ -160,6 +161,27 @@ RSpec.describe PrettyStopwatch do
       sleep(0.2) # 2ms
       stopwatch.stop
       expect(stopwatch.elapsed_nanos).to be_within(3_000_000).of(3_000_000 * 100)
+    end
+  end
+
+  context "when stopwatch is created unstarted" do
+    it "should return 0 ns" do
+      stopwatch = Stopwatch.create_unstarted
+      expect(stopwatch.to_s).to eq("0 ns")
+    end
+  end
+
+  context "when created with a negative elapsed_nanos" do
+    it "should return 0 ns" do
+      stopwatch = Stopwatch.create_unstarted(elapsed_nanos: 0.1)
+      expect(stopwatch.to_s).to eq("0 ns")
+    end
+  end
+
+  context "when created with an elapsed_nanos values < 1" do
+    it "should return 0 ns" do
+      stopwatch = Stopwatch.create_unstarted(elapsed_nanos: 0.5)
+      expect(stopwatch.to_s).to eq("0 ns")
     end
   end
 

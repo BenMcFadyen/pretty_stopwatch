@@ -1,36 +1,34 @@
 # frozen_string_literal: true
 
 # A simple Stopwatch with nanosecond precision and readable formatting.
-# ``` Basic Usage
+#
+# Uses: Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond) to measure elapsed time.
+#
+# "The state-changing methods are not idempotent; it is an error to start or stop a stopwatch
+# that is already in the desired state."
+#
+# Implementation based on the Guava Stopwatch class: 'com.google.common.base.Stopwatch' Credit: The Guava Authors
+# @example Basic Usage
 #     stopwatch = Stopwatch::create_started
 #     sleep(0.1)
 #     stopwatch.stop # optional
 #     puts "slept for #{stopwatch}" # to_s optional
 #     # slept for 100.02 ms
-# ```
-#  Named:
+# @example Named Example:
 #     stopwatch = Stopwatch::create_started(:foo)
 #     sleep(0.2)
 #     puts "#{stopwatch}"
-#     'foo' elapsed: 200.235 ms
-#  Block:
+#     # 'foo' elapsed: 200.235 ms
+# @example Block:
 #     stopwatch = Stopwatch::time{sleep 0.1}
-#  Lambda:
+# @example Lambda:
 #     lambda = -> {sleep 0.15}
 #     stopwatch = Stopwatch::time(lambda)
-#  Proc:
+# @example Proc:
 #     proc = Proc.new {sleep 0.15}
 #     stopwatch = Stopwatch::time(proc)
-#
-# Uses: Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond) to measure elapsed time.
-#
-# The state-changing methods are not idempotent; it is an error to start or stop a stopwatch
-# that is already in the desired state.
-#
-# Implementation based on the Guava Stopwatch class: 'com.google.common.base.Stopwatch' Credit: The Guava Authors
 class Stopwatch
 
-  # Stopwatch methods are not idempotent; it is an error to start or stop a stopwatch that is already in the desired state.
   class IllegalStateError < StandardError
   end
 
@@ -44,10 +42,12 @@ class Stopwatch
     @elapsed_nanos = elapsed_nanos
   end
 
+  # @return [Boolean]
   def running?
     @running
   end
 
+  # @return [Boolean]
   def stopped?
     !@running
   end
@@ -56,27 +56,29 @@ class Stopwatch
 
   class << self
 
-
     # Creates a new Stopwatch, and starts it.
     #
-    # @param [String] name - (optional) - name of the stopwatch.
-    # * +elapsed_nanos+ - (optional) - elapsed_nanos value for the Stopwatch.
+    # @param name [String] (optional) the name of the Stopwatch
+    # @param elapsed_nanos [Integer] (optional) elapsed_nanos (use for testing)
+    # @return [Stopwatch]
     def create_started(name = nil, elapsed_nanos: 0)
       new(name, elapsed_nanos).start
     end
 
     # Creates a new Stopwatch, but does not start it.
     #
-    # * +name+ - (optional) - name of the stopwatch.
-    # * +elapsed_nanos+ - (optional) - elapsed_nanos value for the Stopwatch.
+    # @param name [String] (optional) the name of the Stopwatch
+    # @param elapsed_nanos [Integer] (optional) elapsed_nanos (use for testing)
+    # @return [Stopwatch]
     def create_unstarted(name = nil, elapsed_nanos: 0)
       new(name, elapsed_nanos)
     end
 
-    # Creates a new Stopwatch, executes the given callable/block, returns the stopped Stopwatch.
+    # Times the execution of the given callable/block using a new Stopwatch.
     #
-    # * +callable+ - callable to execute
-    # * +block+ - (optional) - elapsed_nanos value for the Stopwatch.
+    # @param callable [Callable] callable to execute and time
+    # @param block [Block] block to execute and time
+    # @return [Stopwatch] Stopped Stopwatch
     def time(callable = nil, &block)
       stopwatch = create_started
       if callable
@@ -90,6 +92,8 @@ class Stopwatch
     end
   end
 
+  # Starts the Stopwatch
+  # @return [Stopwatch]
   def start
     raise IllegalStateError, "Stopwatch is already running" if @running
     @running = true
@@ -97,6 +101,8 @@ class Stopwatch
     self
   end
 
+  # Stops the Stopwatch
+  # @return [Stopwatch]
   def stop
     raise IllegalStateError, "Stopwatch is already stopped" unless @running
     @elapsed_nanos += Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond) - @start_nanos
@@ -104,12 +110,15 @@ class Stopwatch
     self
   end
 
-  # reset the elapsed time and stops the Stopwatch.
+  # Stops the Stopwatch and resets the elapsed time
+  # @return [Stopwatch]
   def reset
     @running = false
     @elapsed_nanos = 0
+    self
   end
 
+  # @return [Integer]
   def elapsed_nanos
     if running?
       now = Process.clock_gettime(Process::CLOCK_MONOTONIC, :nanosecond)
@@ -118,10 +127,12 @@ class Stopwatch
     @elapsed_nanos
   end
 
+  # @return [Integer]
   def elapsed_millis
     elapsed_nanos / 1_000_000
   end
 
+  # @return [String]
   def to_s
     value_with_unit = PrettyUnitFormatter.scale_nanos_with_unit(elapsed_nanos)
     return "'#{@name}' elapsed: #{value_with_unit}" if @name
@@ -147,13 +158,13 @@ class Stopwatch
       end
 
       def scale_nanos_with_unit(nanos)
-        return "0 ns" if nanos.zero?
+        return "0 ns" if nanos < 1
         unit = get_unit(nanos)
         value = nanos / unit[:divisor].to_f
         "#{format_float(value)} #{unit[:name]}"
       end
 
-      # format float to 3dp & remove trailing zeros
+      # @return [String] Rounded to 3dp and with trailing zeros removed
       private def format_float(float)
         sprintf("%f", float.round(3)).sub(/\.?0*$/, "")
       end
