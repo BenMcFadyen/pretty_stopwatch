@@ -21,6 +21,7 @@
 #     # 'foo' elapsed: 200.235 ms
 # @example Block:
 #     stopwatch = Stopwatch::time{sleep 0.1}
+#     stopwatch.stopped? # true
 # @example Lambda:
 #     lambda = -> {sleep 0.15}
 #     stopwatch = Stopwatch::time(lambda)
