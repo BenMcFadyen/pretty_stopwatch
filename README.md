@@ -26,7 +26,9 @@ A simple Stopwatch with nanosecond precision and readable formatting.
     puts stopwatch.elapsed_millis # 10
     puts stopwatch.reset.elapsed_millis # 0
 
-Based on the Guava Stopwatch com.google.common.base.Stopwatch. Credit: The Guava Authors
+Based on the Guava Stopwatch com.google.common.base.Stopwatch: 
+
+Credit: Copyright (C) 2008 The Guava Authors
 
 ## Installation
 
@@ -39,5 +41,7 @@ If bundler is not being used to manage dependencies, install the gem by executin
     $ gem install pretty_stopwatch
 
 ## License
+
+This project includes code originally published under the Apache License 2.0 The original work can be found [here.](https://github.com/google/guava/blob/master/guava/src/com/google/common/base/Stopwatch.java)
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
