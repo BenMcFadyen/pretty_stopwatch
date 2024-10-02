@@ -6,22 +6,25 @@ A simple Stopwatch with nanosecond precision and readable formatting.
     stopwatch = Stopwatch::create_started
     sleep(0.1)
     stopwatch.stop # optional
-    puts "slept for #{stopwatch}" # to_s optional
-    # slept for 100.02 ms
+    puts stopwatch # 100.02 ms
 ### Named:
     stopwatch = Stopwatch::create_started(:foo)
-    sleep(0.2)
-    puts "#{stopwatch}"
-    #'foo' elapsed: 200.235 ms
+    sleep(5.01)
+    puts stopwatch # 'foo' elapsed: 5.01 s
 ### Block:
-    stopwatch = Stopwatch::time{sleep 0.1}
+    stopwatch = Stopwatch::time{sleep 61.02}
     stopwatch.stopped? # true
-### Lambda:
-    lambda = -> {sleep 0.15}
-    stopwatch = Stopwatch::time(lambda)
-### Proc:
-    proc = Proc.new {sleep 0.15}
-    stopwatch = Stopwatch::time(proc)
+    puts stopwatch # 1.017 min
+### Callable:
+    callable = -> {fast = true} # Proc.new {puts "bar"}
+    stopwatch = Stopwatch::time(callable)
+    puts stopwatch # 3.7 μs
+### Reset:
+    stopwatch = Stopwatch::create_started
+    sleep(0.01) # 10ms
+    puts stopwatch.elapsed_nanos # 10378100
+    puts stopwatch.elapsed_millis # 10
+    puts stopwatch.reset.elapsed_millis # 0
 
 Based on the Guava Stopwatch com.google.common.base.Stopwatch. Credit: The Guava Authors
 
