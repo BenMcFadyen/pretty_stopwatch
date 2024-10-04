@@ -5,4 +5,5 @@ source "https://rubygems.org"
 # Specify your gem's dependencies in pretty_stopwatch.gemspec
 gemspec
 
-gem "bundler" # For managing gem dependencies
+gem "bundler"
+gem "rake"
